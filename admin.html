@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>एडमिन पैनल — हिंदी भाषा की विकास यात्रा</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#EFE7D8; --card:#FFFFFF; --ink:#2B211B; --ink-soft:#6B5F4F;
+  --maroon:#7C2D2D; --green:#33473A; --line:#D9CBB0; --danger:#A32D2D;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--parchment);color:var(--ink);font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;}
+.wrap{max-width:900px;margin:0 auto;padding:30px 20px 80px;}
+h1{font-family:'Noto Serif Devanagari',serif;font-size:26px;margin:0 0 4px;}
+.muted{color:var(--ink-soft);font-size:14px;}
+a{color:var(--maroon);}
+button{font:inherit;cursor:pointer;}
+input{font:inherit;}
+
+#setupScreen{max-width:460px;margin:70px auto;text-align:center;}
+#setupScreen h1{margin-bottom:10px;}
+#setupScreen .muted{margin-bottom:22px;line-height:1.6;}
+#setupScreen input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:4px;margin-bottom:12px;}
+#setupScreen button{width:100%;padding:12px;background:var(--maroon);color:#fff;border:0;border-radius:4px;font-weight:500;}
+#setupError{color:var(--danger);font-size:13px;min-height:18px;margin-bottom:8px;}
+.steps{text-align:right;font-size:13px;color:var(--ink-soft);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:20px;line-height:1.9;}
+
+#panel{display:none;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+.topbar button{background:none;border:1px solid var(--line);padding:8px 16px;border-radius:4px;}
+.era-block{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px;margin-bottom:24px;}
+.era-block h2{font-family:'Noto Serif Devanagari',serif;font-size:20px;margin:0 0 4px;color:var(--green);}
+.era-block .years{color:var(--ink-soft);font-size:13px;margin-bottom:18px;}
+.section-label{font-weight:500;font-size:14px;margin:18px 0 10px;color:var(--maroon);}
+.section-label:first-of-type{margin-top:0;}
+.thumb-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.thumb{position:relative;width:88px;height:88px;border-radius:4px;overflow:hidden;border:1px solid var(--line);}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.thumb .del{position:absolute;top:2px;right:2px;width:22px;height:22px;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;border:0;}
+.upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.upload-row input[type=file]{font-size:13px;}
+.upload-row button{padding:8px 14px;background:var(--green);color:#fff;border:0;border-radius:4px;font-size:13px;}
+.audio-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.audio-row:last-of-type{border-bottom:0;}
+.audio-row .name{flex:1;}
+.audio-row .del{background:none;border:1px solid var(--line);color:var(--danger);padding:4px 10px;border-radius:4px;font-size:12px;}
+.add-audio-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.add-audio-row input[type=text]{padding:8px 10px;border:1px solid var(--line);border-radius:4px;width:180px;}
+.progress{font-size:12px;color:var(--ink-soft);margin-top:6px;min-height:16px;}
+.empty-note{font-size:13px;color:var(--ink-soft);margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<div id="setupScreen">
+  <h1>एडमिन प्रवेश</h1>
+  <p class="muted">इसे केवल पहली बार करना है। GitHub की एक चाबी (access token) बनाकर यहाँ डालें — फिर यह डिवाइस याद रखेगा, दोबारा पासवर्ड नहीं माँगेगा।</p>
+  <div class="steps">
+    1. github.com पर लॉगिन करें<br>
+    2. Settings → Developer settings → Personal access tokens → Fine-grained tokens<br>
+    3. Generate new token<br>
+    4. Repository access में अपना exhibition repo चुनें<br>
+    5. Permissions में "Contents" को Read and write करें<br>
+    6. Generate token दबाएँ और उसे कॉपी करके नीचे डालें
+  </div>
+  <input type="password" id="tokenInput" placeholder="यहाँ token पेस्ट करें" autocomplete="off">
+  <div id="setupError"></div>
+  <button id="setupBtn">सेव करें और प्रवेश करें</button>
+</div>
+
+<div id="panel">
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>एडमिन पैनल</h1>
+        <p class="muted">फ़ोटो और गीत यहाँ से जोड़ें या हटाएँ — कुछ मिनट में वेबसाइट पर दिखेंगे।</p>
+      </div>
+      <button id="logoutBtn">लॉग आउट</button>
+    </div>
+    <div id="eraBlocks"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/';
+let TOKEN = localStorage.getItem('gh_admin_token') || '';
+
+const setupScreen = document.getElementById('setupScreen');
+const panel = document.getElementById('panel');
+const tokenInput = document.getElementById('tokenInput');
+const setupBtn = document.getElementById('setupBtn');
+const setupError = document.getElementById('setupError');
+
+function headers(){
+  return { Authorization: 'token ' + TOKEN, Accept: 'application/vnd.github+json' };
+}
+
+function showPanel(){ setupScreen.style.display = 'none'; panel.style.display = 'block'; buildPanel(); }
+function showSetup(){ setupScreen.style.display = 'block'; panel.style.display = 'none'; }
+
+setupBtn.addEventListener('click', () => {
+  const t = tokenInput.value.trim();
+  if(!t){ setupError.textContent = 'पहले token डालें।'; return; }
+  TOKEN = t;
+  setupError.textContent = 'जाँच हो रही है...';
+  fetch(API + 'manifest.json', { headers: headers() }).then(r => {
+    if(r.status === 401 || r.status === 403){ setupError.textContent = 'यह token काम नहीं कर रहा। दोबारा जाँचें।'; return; }
+    localStorage.setItem('gh_admin_token', TOKEN);
+    setupError.textContent = '';
+    showPanel();
+  }).catch(() => { setupError.textContent = 'इंटरनेट जाँचें और दोबारा कोशिश करें।'; });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('gh_admin_token');
+  TOKEN = '';
+  showSetup();
+});
+
+if(TOKEN) showPanel(); else showSetup();
+
+function b64ToUtf8(b64){ return decodeURIComponent(escape(atob(b64.replace(/\n/g,'')))); }
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+function getManifest(){
+  return fetch(API + 'manifest.json', { headers: headers() }).then(r => {
+    if(r.status === 404){
+      const empty = {};
+      ERAS.forEach(e => empty[e.id] = { images: [], audio: [] });
+      return { sha: null, data: empty };
+    }
+    return r.json().then(j => ({ sha: j.sha, data: JSON.parse(b64ToUtf8(j.content)) }));
+  });
+}
+
+function putManifest(data, sha, message){
+  const body = { message: message, content: utf8ToB64(JSON.stringify(data, null, 2)), branch: GITHUB_BRANCH };
+  if(sha) body.sha = sha;
+  return fetch(API + 'manifest.json', { method: 'PUT', headers: headers(), body: JSON.stringify(body) })
+    .then(r => { if(!r.ok) throw new Error('manifest save failed'); return r.json(); });
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function safeName(name){ return name.toLowerCase().replace(/[^a-z0-9.\-]+/g, '-'); }
+
+function putFile(path, base64Content, message){
+  const body = { message: message, content: base64Content, branch: GITHUB_BRANCH };
+  return fetch(API + path, { method: 'PUT', headers: headers(), body: JSON.stringify(body) })
+    .then(r => { if(!r.ok) throw new Error('upload failed'); return r.json(); });
+}
+
+function deleteFile(path, sha, message){
+  const body = { message: message, sha: sha, branch: GITHUB_BRANCH };
+  return fetch(API + path, { method: 'DELETE', headers: headers(), body: JSON.stringify(body) });
+}
+
+function buildPanel(){
+  const container = document.getElementById('eraBlocks');
+  container.innerHTML = '';
+  ERAS.forEach(era => {
+    const block = document.createElement('div');
+    block.className = 'era-block';
+    block.innerHTML = `
+      <h2>${era.label}</h2>
+      <div class="years">${era.years}</div>
+      <p class="section-label">तस्वीरें</p>
+      <div class="thumb-row" id="thumbs-${era.id}"></div>
+      <div class="upload-row">
+        <input type="file" id="imgFile-${era.id}" accept="image/*" multiple>
+        <button id="imgBtn-${era.id}">फ़ोटो जोड़ें</button>
+      </div>
+      <div class="progress" id="imgProgress-${era.id}"></div>
+      <p class="section-label">गीत</p>
+      <div id="audios-${era.id}"></div>
+      <div class="add-audio-row">
+        <input type="text" id="audioName-${era.id}" placeholder="गीत का नाम">
+        <input type="file" id="audioFile-${era.id}" accept="audio/*">
+        <button id="audioBtn-${era.id}">गीत जोड़ें</button>
+      </div>
+      <div class="progress" id="audioProgress-${era.id}"></div>`;
+    container.appendChild(block);
+    document.getElementById(`imgBtn-${era.id}`).addEventListener('click', () => uploadImages(era.id));
+    document.getElementById(`audioBtn-${era.id}`).addEventListener('click', () => uploadAudio(era.id));
+  });
+  refreshAll();
+}
+
+function refreshAll(){
+  getManifest().then(({ data }) => {
+    ERAS.forEach(era => {
+      const e = data[era.id] || { images: [], audio: [] };
+      renderThumbs(era.id, e.images || []);
+      renderAudioRows(era.id, e.audio || []);
+    });
+  });
+}
+
+function renderThumbs(eraId, items){
+  const el = document.getElementById('thumbs-' + eraId);
+  el.innerHTML = '';
+  if(!items.length){ el.innerHTML = '<p class="empty-note">अभी कोई तस्वीर नहीं है।</p>'; return; }
+  items.forEach(item => {
+    const t = document.createElement('div');
+    t.className = 'thumb';
+    t.innerHTML = `<img src="${item.path}" alt=""><button class="del" aria-label="हटाएँ">&times;</button>`;
+    t.querySelector('.del').addEventListener('click', () => removeItem(eraId, 'images', item));
+    el.appendChild(t);
+  });
+}
+
+function renderAudioRows(eraId, items){
+  const el = document.getElementById('audios-' + eraId);
+  el.innerHTML = '';
+  if(!items.length){ el.innerHTML = '<p class="empty-note">अभी कोई गीत नहीं है।</p>'; return; }
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'audio-row';
+    row.innerHTML = `<span class="name">${item.name || 'गीत'}</span><button class="del">हटाएँ</button>`;
+    row.querySelector('.del').addEventListener('click', () => removeItem(eraId, 'audio', item));
+    el.appendChild(row);
+  });
+}
+
+function removeItem(eraId, kind, item){
+  if(!confirm('क्या आप वाकई इसे हटाना चाहते हैं?')) return;
+  deleteFile(item.path, item.sha, 'हटाया: ' + item.path).catch(()=>{}).then(() => {
+    return getManifest();
+  }).then(({ sha, data }) => {
+    const list = data[eraId][kind] || [];
+    data[eraId][kind] = list.filter(x => x.path !== item.path);
+    return putManifest(data, sha, 'सूची अपडेट: ' + item.path + ' हटाया');
+  }).then(refreshAll).catch(() => alert('हटाने में समस्या हुई, दोबारा कोशिश करें।'));
+}
+
+function uploadImages(eraId){
+  const input = document.getElementById('imgFile-' + eraId);
+  const progress = document.getElementById('imgProgress-' + eraId);
+  const files = Array.from(input.files || []);
+  if(!files.length){ progress.textContent = 'पहले एक फ़ोटो चुनें।'; return; }
+  progress.textContent = `अपलोड हो रहा है (0/${files.length})...`;
+  let done = 0;
+
+  function uploadOne(file){
+    const path = `images/${eraId}/${Date.now()}-${safeName(file.name)}`;
+    return fileToBase64(file)
+      .then(b64 => putFile(path, b64, 'फ़ोटो जोड़ी: ' + path))
+      .then(res => getManifest().then(({ sha, data }) => {
+        if(!data[eraId]) data[eraId] = { images: [], audio: [] };
+        data[eraId].images.push({ path: path, sha: res.content.sha });
+        return putManifest(data, sha, 'सूची अपडेट: ' + path + ' जोड़ी');
+      }))
+      .then(() => { done++; progress.textContent = `अपलोड हो रहा है (${done}/${files.length})...`; });
+  }
+
+  files.reduce((p, file) => p.then(() => uploadOne(file)), Promise.resolve())
+    .then(() => { progress.textContent = 'हो गया।'; input.value = ''; refreshAll(); setTimeout(()=>progress.textContent='',2500); })
+    .catch(() => { progress.textContent = 'अपलोड नहीं हो सका। दोबारा कोशिश करें।'; });
+}
+
+function uploadAudio(eraId){
+  const nameInput = document.getElementById('audioName-' + eraId);
+  const fileInput = document.getElementById('audioFile-' + eraId);
+  const progress = document.getElementById('audioProgress-' + eraId);
+  const file = fileInput.files && fileInput.files[0];
+  const name = nameInput.value.trim();
+  if(!name){ progress.textContent = 'गीत का नाम लिखें।'; return; }
+  if(!file){ progress.textContent = 'एक ऑडियो फ़ाइल चुनें।'; return; }
+  progress.textContent = 'अपलोड हो रहा है...';
+  const path = `audio/${eraId}/${Date.now()}-${safeName(file.name)}`;
+  fileToBase64(file)
+    .then(b64 => putFile(path, b64, 'गीत जोड़ा: ' + path))
+    .then(res => getManifest().then(({ sha, data }) => {
+      if(!data[eraId]) data[eraId] = { images: [], audio: [] };
+      data[eraId].audio.push({ name: name, path: path, sha: res.content.sha });
+      return putManifest(data, sha, 'सूची अपडेट: ' + name + ' जोड़ा');
+    }))
+    .then(() => { progress.textContent = 'हो गया।'; nameInput.value = ''; fileInput.value = ''; refreshAll(); setTimeout(()=>progress.textContent='',2500); })
+    .catch(() => { progress.textContent = 'अपलोड नहीं हो सका। दोबारा कोशिश करें।'; });
+}
+</script>
+</body>
+</html>
