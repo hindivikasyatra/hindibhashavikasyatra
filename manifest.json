@@ -46,7 +46,12 @@
     ]
   },
   "aadhunikkaal": {
-    "images": [],
+    "images": [
+      {
+        "path": "images/aadhunikkaal/1789143655354-2026-09-11-20-17-56-desktop---file-explorer.png",
+        "sha": "ab70298fd8a9696f37a1a4c446185b6a4c2bc5a1"
+      }
+    ],
     "audio": []
   }
 }
