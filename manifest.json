@@ -45,7 +45,13 @@
         "sha": "bbeb1100a543011050cd1ab6f2fda8010207da46"
       }
     ],
-    "audio": []
+    "audio": [
+      {
+        "name": "Baal-Kand-Adi-Khand-Pt-1",
+        "path": "audio/bhaktikaal/1789143611228-second-audio-ytsave-youtube-baal-kand-adi-khand-pt-1-media-mfdbqeope-s-009-128k.mp3",
+        "sha": "08fa73b34bc8c9a42bae93507df78ac9df41fd54"
+      }
+    ]
   },
   "aadhunikkaal": {
     "images": [],
