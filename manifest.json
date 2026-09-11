@@ -23,7 +23,12 @@
     ]
   },
   "bhaktikaal": {
-    "images": [],
+    "images": [
+      {
+        "path": "images/bhaktikaal/1789143492727-whatsapp-image-2026-09-10-at-6.13.59-pm-1-.jpeg",
+        "sha": "193eb13387b28069c20952abce69e643cef5a093"
+      }
+    ],
     "audio": []
   },
   "aadhunikkaal": {
