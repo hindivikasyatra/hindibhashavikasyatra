@@ -18,7 +18,13 @@
         "sha": "8188e6e65c3e5597bb45a2f10abe1857c9080dec"
       }
     ],
-    "audio": []
+    "audio": [
+      {
+        "name": "RANBANKURA",
+        "path": "audio/aadikaal/1789142447116-first-audio-ep10-prithviraj-gracious-death--ranbankura--the-invincible-warriors-of-india--omny.fm.mp3",
+        "sha": "d261847c721db6796868beab8f9b70e75ea57bc9"
+      }
+    ]
   },
   "bhaktikaal": {
     "images": [],
